@@ -54,6 +54,11 @@ _tasks:
     working_directory: "{{ project_slug }}"
   - command: "git add README.md"
     working_directory: "{{ project_slug }}"
+  # init venv
+  - command: "uv sync"
+    working_directory: : "{{ project_slug }}"
+  - command: "uvx pre-commit install"
+    working_directory: : "{{ project_slug }}"
   # commit the rest
   - command: "git commit -m \"initial commit\""
     working_directory: "{{ project_slug }}"
