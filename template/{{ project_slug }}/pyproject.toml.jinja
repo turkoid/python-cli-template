@@ -1,0 +1,15 @@
+[project]
+name = "{{ project_slug }}"
+version = "0.1.0"
+description = "{{ project_description }}"
+dependencies = []
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">={{ python_version }}"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+    "ruff>=0.14.10",
+]

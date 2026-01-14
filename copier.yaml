@@ -1,0 +1,68 @@
+project_name:
+  type: str
+  help: "Name of project:"
+  validator: |-
+    {% if not project_name %}
+    value cannot be empty
+    {% endif %}
+
+project_slug:
+  type: str
+  default: "{{ project_name|trim|lower|replace(' ', '-') }}"
+
+project_description:
+  type: str
+  help: "Short project description:"
+  validator: |-
+    {% if not project_description %}
+    value cannot be empty
+    {% endif %}
+
+project_author:
+  type: str
+  help: "Project author:"
+  default: "turkoid"
+
+python_version:
+  type: str
+  help: "Python version:"
+  default: "3.13"
+  choices:
+    - "3.9"
+    - "3.10"
+    - "3.11"
+    - "3.12"
+    - "3.13"
+
+package_name:
+  type: str
+  help: "Package name:"
+  default: "{{ project_slug.replace('-', '_') }}"
+  validator: |-
+    {% if package_name|length < 4 or module_name|length > 40 %}
+    value must be between 4 and 40 characters
+    {% endif %}
+    {% if not (package_name | regex_search('^[a-z][a-z0-9_]+$')) %}
+    value must start with a letter, followed one or more letters, digits or underscores (all lowercase).
+    {% endif %}
+
+_subdirectory: template
+
+_tasks:
+  # init repo and commit README.md
+  - command: "git init"
+    working_directory: "{{ project_slug }}"
+  - command: "git add README.md"
+    working_directory: "{{ project_slug }}"
+  # commit the rest
+  - command: "git commit -m \"initial commit\""
+    working_directory: "{{ project_slug }}"
+  - command: "git add ."
+    working_directory: "{{ project_slug }}"
+  - command: "git commit -m \"bootstrapped python-cli project: {{ project_name }}\""
+    working_directory: "{{ project_slug }}"
+  # create Github repo and push
+  - command: "gh repo create --description=\"{{ project_description }}\" --source=. --public {{ project_slug }}"
+    working_directory: "{{ project_slug }}"
+  - command: "git push -u origin main"
+    working_directory: "{{ project_slug }}"
