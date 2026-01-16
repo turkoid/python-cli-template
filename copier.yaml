@@ -2,8 +2,8 @@ project_name:
   type: str
   help: "Name of project:"
   validator: |-
-    {% if not project_name %}
-    value cannot be empty
+    {% if project_name|length < 4 or project_name|length > 40 %}
+    value must be between 4 and 40 characters
     {% endif %}
 
 project_slug:
@@ -39,12 +39,17 @@ package_name:
   help: "Package name:"
   default: "{{ project_slug.replace('-', '_') }}"
   validator: |-
-    {% if package_name|length < 4 or module_name|length > 40 %}
+    {% if package_name|length < 4 or package_name|length > 40 %}
     value must be between 4 and 40 characters
     {% endif %}
     {% if not (package_name | regex_search('^[a-z][a-z0-9_]+$')) %}
     value must start with a letter, followed one or more letters, digits or underscores (all lowercase).
     {% endif %}
+
+use_github:
+  type: bool
+  help: Create GitHub repo?
+  default: true
 
 _subdirectory: template
 
@@ -54,14 +59,14 @@ _tasks:
     working_directory: "{{ project_slug }}"
   - command: "git add README.md"
     working_directory: "{{ project_slug }}"
+  - command: "git commit -m \"initial commit\""
+    working_directory: "{{ project_slug }}"
   # init venv
   - command: "uv sync"
     working_directory: "{{ project_slug }}"
-  - command: "uvx pre-commit install"
+  - command: "uv run pre-commit install"
     working_directory: "{{ project_slug }}"
   # commit the rest
-  - command: "git commit -m \"initial commit\""
-    working_directory: "{{ project_slug }}"
   - command: "git add ."
     working_directory: "{{ project_slug }}"
   - command: "git commit -m \"bootstrapped python-cli project: {{ project_name }}\""
@@ -69,5 +74,7 @@ _tasks:
   # create Github repo and push
   - command: "gh repo create --description=\"{{ project_description }}\" --source=. --public {{ project_slug }}"
     working_directory: "{{ project_slug }}"
+    when: "{{ use_github }}"
   - command: "git push -u origin main"
     working_directory: "{{ project_slug }}"
+    when: "{{ use_github }}"
