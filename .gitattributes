@@ -29,10 +29,9 @@
 
 # Lock files
 uv.lock binary
-poetry.lock binary
-package-lock.json binary
 
 # Binary files
+*.svg binary
 *.png binary
 *.jpg binary
 *.jpeg binary
