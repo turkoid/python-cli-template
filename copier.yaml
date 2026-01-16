@@ -64,7 +64,7 @@ _tasks:
   # init venv
   - command: "uv sync"
     working_directory: "{{ project_slug }}"
-  - command: "uv run pre-commit install"
+  - command: "pre-commit install"
     working_directory: "{{ project_slug }}"
   # commit the rest
   - command: "git add ."
