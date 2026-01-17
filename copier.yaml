@@ -76,9 +76,9 @@ _tasks:
     working_directory: "{{ project_slug }}"
     when: "{{ _copier_operation == 'copy' }}"
   # create Github repo and push
-  - command: "gh repo create --description=\"{{ project_description }}\" --source=. --public {{ project_slug }}"
+  - command: "gh repo view owner/repo-name &>/dev/null || gh repo create --description=\"{{ project_description }}\" --source=. --public {{ project_slug }}"
     working_directory: "{{ project_slug }}"
     when: "{{ use_github and _copier_operation == 'copy' }}"
-  - command: "git push -u origin main"
+  - command: "gh repo view owner/repo-name &>/dev/null || git push -u origin main"
     working_directory: "{{ project_slug }}"
     when: "{{ use_github and _copier_operation == 'copy' }}"
