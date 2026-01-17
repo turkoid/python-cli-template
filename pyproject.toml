@@ -1,7 +1,7 @@
 [project]
 name = "python-cli-template"
 
-version = "1.2.0"
+version = "1.2.1"
 description = "Repo for my copier templates"
 dependencies = [
     "copier>=9.11.1",
@@ -20,7 +20,7 @@ dev = [
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "1.2.0"
+version = "1.2.1"
 tag_format = "v$version"
 version_files = [
     "pyproject.toml:version"
