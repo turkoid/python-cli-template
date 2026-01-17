@@ -25,3 +25,6 @@ tag_format = "v$version"
 version_files = [
     "pyproject.toml:version"
 ]
+pre_bump_hooks = [
+    "uv lock"
+]
