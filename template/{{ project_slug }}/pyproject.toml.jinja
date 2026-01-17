@@ -10,6 +10,10 @@ requires-python = ">={{ python_version }}"
 
 [dependency-groups]
 dev = [
+    "click>=8.3.1",
     "pre-commit>=4.5.1",
     "ruff>=0.14.10",
 ]
+
+[project.scripts]
+qr = "{{ package_name }}.main:cli"
