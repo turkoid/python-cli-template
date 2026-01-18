@@ -5,6 +5,7 @@ version = "1.2.2"
 description = "Repo for my copier templates"
 dependencies = [
     "copier>=9.11.1",
+    "jinja2-shell-extension>=2.1.1",
 ]
 readme = "README.md"
 license = "MIT"

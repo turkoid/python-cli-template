@@ -1,19 +1,20 @@
 project_name:
   type: str
   help: "Name of project:"
-  validator: |-
+  validator: >-
     {% if project_name|length < 4 or project_name|length > 40 %}
     value must be between 4 and 40 characters
     {% endif %}
 
 project_slug:
   type: str
+  help: "Project directory name:"
   default: "{{ project_name|trim|lower|replace(' ', '-') }}"
 
 project_description:
   type: str
   help: "Short project description:"
-  validator: |-
+  validator: >-
     {% if not project_description %}
     value cannot be empty
     {% endif %}
@@ -38,7 +39,7 @@ package_name:
   type: str
   help: "Package name:"
   default: "{{ project_slug.replace('-', '_') }}"
-  validator: |-
+  validator: >-
     {% if package_name|length < 4 or package_name|length > 40 %}
     value must be between 4 and 40 characters
     {% endif %}
@@ -51,7 +52,38 @@ use_github:
   help: Create GitHub repo?
   default: true
 
+github_username:
+  type: str
+  help: "Github username:"
+  default: "turkoid"
+  when: "{{ use_github }}"
+  validator: >-
+    {% if not github_username %}
+    value cannot be empty
+    {% endif %}
+
+remote_repo_exists:
+  type: bool
+  default: >-
+    {%- if use_github -%}
+      {%- set null_device = 'nul' if _copier_conf.os == 'windows' else '/dev/null' -%}
+      {%- set cmd = 'gh repo view %s/%s >%s 2>%s && echo true || echo false' % (github_username, project_slug, null_device, null_device) -%}
+      {{ cmd | shell | trim == 'true' }}
+    {%- else -%}
+      false
+    {%- endif -%}
+  when: false
+
+add_origin:
+  type: bool
+  help: "Github repo '{{ github_username + '/' + project_slug + '.git' }}' exists. Add remote origin?"
+  default: false
+  when: "{{ use_github and remote_repo_exists }}"
+
 _subdirectory: template
+
+_jinja_extensions:
+  - jinja2_shell_extension.ShellExtension
 
 _tasks:
   # init repo and commit README.md
@@ -76,9 +108,15 @@ _tasks:
     working_directory: "{{ project_slug }}"
     when: "{{ _copier_operation == 'copy' }}"
   # create Github repo and push
-  - command: "gh repo view owner/repo-name &>/dev/null || gh repo create --description=\"{{ project_description }}\" --source=. --public {{ project_slug }}"
+  - command: "gh repo create --description=\"{{ project_description }}\" --source=. --public {{ project_slug }}"
     working_directory: "{{ project_slug }}"
-    when: "{{ use_github and _copier_operation == 'copy' }}"
-  - command: "gh repo view owner/repo-name &>/dev/null || git push -u origin main"
+    when: "{{ use_github and not remote_repo_exists and _copier_operation == 'copy' }}"
+  - command: "git push -u origin main"
     working_directory: "{{ project_slug }}"
-    when: "{{ use_github and _copier_operation == 'copy' }}"
+    when: "{{ use_github and not remote_repo_exists  and _copier_operation == 'copy' }}"
+  - command: "git remote add origin {{ 'git@github.com:' + github_username + '/' + project_slug + '.git' }}"
+    working_directory: "{{ project_slug }}"
+    when: "{{ add_origin and _copier_operation == 'copy' }}"
+  - command: "git fetch && git branch --set-upstream-to=origin/main main"
+    working_directory: "{{ project_slug }}"
+    when: "{{ add_origin and _copier_operation == 'copy' }}"
