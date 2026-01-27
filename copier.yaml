@@ -14,10 +14,6 @@ project_slug:
 project_description:
   type: str
   help: "Short project description:"
-  validator: >-
-    {% if not project_description %}
-    value cannot be empty
-    {% endif %}
 
 project_author:
   type: str
@@ -50,7 +46,7 @@ package_name:
 use_github:
   type: bool
   help: Create GitHub repo?
-  default: true
+  default: false
 
 github_username:
   type: str
